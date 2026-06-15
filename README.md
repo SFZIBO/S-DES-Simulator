@@ -6,7 +6,7 @@ Aplikasi ini melakukan proses **enkripsi** dan **dekripsi** S-DES secara lengkap
 
 ---
 
-## 🔗 Tautan
+## Tautan
 
 | Komponen | Link |
 |---|---|
@@ -16,7 +16,7 @@ Aplikasi ini melakukan proses **enkripsi** dan **dekripsi** S-DES secara lengkap
 
 ---
 
-## ✨ Fitur
+## Fitur
 
 - Input **plaintext/ciphertext 8-bit** dan **kunci 10-bit** dalam bentuk biner, dengan validasi otomatis
 - Pilihan mode **Enkripsi** atau **Dekripsi**
@@ -32,7 +32,7 @@ Aplikasi ini melakukan proses **enkripsi** dan **dekripsi** S-DES secara lengkap
 
 ---
 
-## 🚀 Cara Menggunakan
+## Cara Menggunakan
 
 ### 1. Menjalankan secara lokal
 
@@ -52,14 +52,14 @@ cd <nama-folder>
 1. **Masukkan Plaintext/Ciphertext** — isi kolom pertama dengan **8 digit biner** (hanya angka `0` dan `1`), contoh: `01101101`
 2. **Masukkan Kunci** — isi kolom kedua dengan **10 digit biner**, contoh: `1010000010`
 3. **Pilih Mode**:
-   - **🔒 Enkripsi** — jika input adalah plaintext, hasil berupa ciphertext
-   - **🔓 Dekripsi** — jika input adalah ciphertext, hasil berupa plaintext
+   - ** Enkripsi** — jika input adalah plaintext, hasil berupa ciphertext
+   - ** Dekripsi** — jika input adalah ciphertext, hasil berupa plaintext
 4. Klik **▶ PROSES** (atau tekan tombol `Enter`)
 5. Hasil akan muncul di bagian **"Hasil"**, ditampilkan dalam kotak bit dan format biner
 6. Klik **"📋 Tampilkan Solusi Penyelesaian"** untuk melihat seluruh langkah perhitungan secara rinci
 7. Klik **↺ RESET** untuk mengosongkan semua input dan mengulang dari awal
 
-> ⚠️ Validasi otomatis: jika input bukan biner murni atau panjangnya tidak sesuai (8-bit untuk plaintext/ciphertext, 10-bit untuk kunci), field akan ditandai merah dengan pesan error.
+> Validasi otomatis: jika input bukan biner murni atau panjangnya tidak sesuai (8-bit untuk plaintext/ciphertext, 10-bit untuk kunci), field akan ditandai merah dengan pesan error.
 
 ### Contoh Pengujian
 
@@ -72,7 +72,7 @@ Jika dekripsi dilakukan dengan kunci yang sama, hasilnya akan kembali menjadi pl
 
 ---
 
-## 🧮 Tentang Algoritma S-DES
+## Tentang Algoritma S-DES
 
 S-DES adalah versi sederhana dari algoritma **DES (Data Encryption Standard)**, dikembangkan oleh Edward Schaefer (1996) sebagai media pembelajaran kriptografi. S-DES menggunakan:
 
@@ -117,7 +117,7 @@ R (4-bit) → EP (8-bit) → XOR dengan subkunci → bagi 2x4-bit
 
 ---
 
-## 🛠️ Teknologi yang Digunakan
+## Teknologi yang Digunakan
 
 - **HTML5** — struktur halaman
 - **CSS3** — styling (dark theme, responsif, custom properties)
@@ -125,7 +125,7 @@ R (4-bit) → EP (8-bit) → XOR dengan subkunci → bagi 2x4-bit
 
 ---
 
-## 📁 Struktur Project
+## Struktur Project
 
 ```
 .
@@ -136,13 +136,13 @@ R (4-bit) → EP (8-bit) → XOR dengan subkunci → bagi 2x4-bit
 
 ---
 
-## 📚 Referensi
+## Referensi
 
 - Schaefer, E. F. (1996). *A simplified data encryption standard algorithm*. Cryptologia, 20(1), 77–84.
 - Stallings, W. (2017). *Cryptography and Network Security: Principles and Practice* (7th ed.). Pearson Education.
 
 ---
 
-## 📄 Lisensi
+## Lisensi
 
 Project ini dibuat untuk keperluan tugas akademik Mata Kuliah Kriptografi.
