@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulasi S-DES — Simplified Data Encryption Standard</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --border: #30363d;
+    --border2: #444c56;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --text3: #6e7681;
+    --accent: #58a6ff;
+    --accent2: #1f6feb;
+    --accent-bg: #1c2a3f;
+    --green: #3fb950;
+    --green-bg: #122920;
+    --amber: #d29922;
+    --amber-bg: #2d1f00;
+    --purple: #a371f7;
+    --purple-bg: #271d3b;
+    --teal: #39d3bb;
+    --teal-bg: #0d2b27;
+    --red: #f85149;
+    --red-bg: #2d0f0e;
+    --success: #238636;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    text-align: center;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  header h1 span {
+    color: var(--accent);
+  }
+
+  header p {
+    color: var(--text2);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .card-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    margin-bottom: 1rem;
+  }
+
+  .input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 600px) {
+    .input-row { grid-template-columns: 1fr; }
+  }
+
+  .field label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text2);
+    margin-bottom: 0.4rem;
+  }
+
+  .field input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    padding: 0.6rem 0.875rem;
+    font-size: 1rem;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.15em;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+
+  .field input:focus { border-color: var(--accent2); }
+  .field input.error { border-color: var(--red); }
+  .field input.ok { border-color: var(--green); }
+
+  .field .hint {
+    font-size: 0.72rem;
+    color: var(--text3);
+    margin-top: 0.3rem;
+  }
+
+  .field .err-msg {
+    font-size: 0.72rem;
+    color: var(--red);
+    margin-top: 0.3rem;
+    display: none;
+  }
+
+  .mode-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .mode-btn {
+    flex: 1;
+    padding: 0.65rem 1rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--text2);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .mode-btn:hover { border-color: var(--border2); color: var(--text); }
+
+  .mode-btn.active {
+    background: var(--accent-bg);
+    border-color: var(--accent2);
+    color: var(--accent);
+  }
+
+  .action-row {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .btn-submit {
+    flex: 1;
+    padding: 0.7rem 1.5rem;
+    background: var(--accent2);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .btn-submit:hover { opacity: 0.85; }
+
+  .btn-reset {
+    padding: 0.7rem 1.25rem;
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-reset:hover { border-color: var(--border2); color: var(--text); }
+
+  .result-box {
+    display: none;
+  }
+
+  .result-label {
+    font-size: 0.8rem;
+    color: var(--text2);
+    margin-bottom: 0.5rem;
+  }
+
+  .bit-row {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .bit-cell {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    border: 1.5px solid;
+  }
+
+  .bit-0 {
+    background: var(--bg3);
+    border-color: var(--border);
+    color: var(--text2);
+  }
+
+  .bit-1 {
+    background: var(--accent-bg);
+    border-color: var(--accent2);
+    color: var(--accent);
+  }
+
+  .bit-result {
+    background: var(--green-bg);
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .bit-k {
+    background: var(--purple-bg);
+    border-color: var(--purple);
+    color: var(--purple);
+  }
+
+  .bit-amber {
+    background: var(--amber-bg);
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+
+  .bit-teal {
+    background: var(--teal-bg);
+    border-color: var(--teal);
+    color: var(--teal);
+  }
+
+  .bit-idx {
+    font-size: 0.6rem;
+    color: var(--text3);
+    margin-top: 0.2rem;
+    text-align: center;
+    width: 36px;
+    font-family: monospace;
+  }
+
+  .bit-group { display: flex; flex-direction: column; align-items: center; }
+
+  .bit-sep {
+    width: 1px;
+    height: 36px;
+    background: var(--border2);
+    margin: 0 4px;
+    align-self: center;
+  }
+
+  .result-final {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--green-bg);
+    border: 1px solid var(--green);
+    border-radius: var(--radius);
+    margin-top: 0.5rem;
+  }
+
+  .result-final .label {
+    font-size: 0.8rem;
+    color: var(--green);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    min-width: 80px;
+  }
+
+  .result-final .value {
+    font-family: 'Courier New', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: 0.2em;
+  }
+
+  .toggle-btn {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text2);
+    font-size: 0.875rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.15s;
+  }
+
+  .toggle-btn:hover { border-color: var(--border2); color: var(--text); }
+
+  .toggle-icon {
+    transition: transform 0.2s;
+    font-size: 1rem;
+  }
+
+  .toggle-icon.open { transform: rotate(180deg); }
+
+  .steps-container {
+    display: none;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .section-header:first-child { margin-top: 0; }
+
+  .section-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .badge-blue { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent2); }
+  .badge-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple); }
+  .badge-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
+  .badge-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber); }
+  .badge-teal { background: var(--teal-bg); color: var(--teal); border: 1px solid var(--teal); }
+  .badge-red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red); }
+
+  .section-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .step {
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .step-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.6rem;
+  }
+
+  .step-label span {
+    color: var(--accent);
+  }
+
+  .permutation-table {
+    display: inline-flex;
+    gap: 2px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px;
+    margin: 0.25rem 0;
+    flex-wrap: wrap;
+  }
+
+  .perm-cell {
+    width: 28px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: monospace;
+    font-size: 0.75rem;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text2);
+  }
+
+  .arrow-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text3);
+    font-size: 0.8rem;
+    margin: 0.4rem 0;
+    flex-wrap: wrap;
+  }
+
+  .arrow-row .arr { color: var(--accent); font-size: 1rem; }
+
+  .xor-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .xor-sym {
+    font-size: 1.2rem;
+    color: var(--amber);
+    font-weight: 700;
+    padding: 0 0.25rem;
+  }
+
+  .sbox-table {
+    border-collapse: collapse;
+    font-family: monospace;
+    font-size: 0.85rem;
+    margin: 0.5rem 0;
+  }
+
+  .sbox-table td, .sbox-table th {
+    border: 1px solid var(--border);
+    padding: 4px 12px;
+    text-align: center;
+  }
+
+  .sbox-table th {
+    background: var(--bg2);
+    color: var(--text2);
+    font-size: 0.7rem;
+  }
+
+  .sbox-table .highlight {
+    background: var(--purple-bg);
+    color: var(--purple);
+    font-weight: 700;
+  }
+
+  .inline-code {
+    font-family: 'Courier New', monospace;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 0.85em;
+    color: var(--teal);
+  }
+
+  .text-note {
+    font-size: 0.8rem;
+    color: var(--text2);
+    margin-top: 0.4rem;
+    line-height: 1.5;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1.5rem 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Simulasi <span>S-DES</span></h1>
+  <p>Simplified Data Encryption Standard — Reyhan Aditya Kusumah</p>
+</header>
+
+<div class="container">
+
+  <!-- INPUT CARD -->
+  <div class="card">
+    <div class="card-title">Input</div>
+
+    <div class="input-row">
+      <div class="field">
+        <label id="input-label">Plaintext (8-bit biner)</label>
+        <input type="text" id="input-text" maxlength="8" placeholder="00000000" spellcheck="false" autocomplete="off">
+        <div class="hint" id="input-hint">Masukkan 8 bit: contoh <code>01101101</code></div>
+        <div class="err-msg" id="input-err">Harus tepat 8 karakter biner (0 atau 1)</div>
+      </div>
+      <div class="field">
+        <label>Kunci (10-bit biner)</label>
+        <input type="text" id="input-key" maxlength="10" placeholder="0000000000" spellcheck="false" autocomplete="off">
+        <div class="hint">Masukkan 10 bit: contoh <code>1010000010</code></div>
+        <div class="err-msg" id="key-err">Harus tepat 10 karakter biner (0 atau 1)</div>
+      </div>
+    </div>
+
+    <div class="mode-row">
+      <div class="mode-btn active" id="btn-enc" onclick="setMode('enc')">🔒 Enkripsi</div>
+      <div class="mode-btn" id="btn-dec" onclick="setMode('dec')">🔓 Dekripsi</div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn-submit" onclick="process()">▶ PROSES</button>
+      <button class="btn-reset" onclick="resetAll()">↺ RESET</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="card result-box" id="result-card">
+    <div class="card-title">Hasil</div>
+    <div class="result-label" id="result-label">Ciphertext</div>
+    <div id="result-bits" class="bit-row" style="margin-bottom:0.75rem;"></div>
+    <div class="result-final">
+      <div class="label" id="result-type-label">Ciphertext</div>
+      <div class="value" id="result-value">00000000</div>
+    </div>
+  </div>
+
+  <!-- STEPS TOGGLE -->
+  <div id="steps-toggle-wrap" style="display:none;">
+    <button class="toggle-btn" onclick="toggleSteps()">
+      <span>📋 Tampilkan Solusi Penyelesaian (Step-by-Step)</span>
+      <span class="toggle-icon" id="toggle-icon">▼</span>
+    </button>
+    <div class="card steps-container" id="steps-container" style="margin-top:0.75rem;"></div>
+  </div>
+
+</div>
+
+<script>
+let currentMode = 'enc';
+
+// ─── S-DES CONSTANTS ───────────────────────────────────────────────
+const P10 = [3,5,2,7,4,10,1,9,8,6];
+const P8  = [6,3,7,4,8,5,10,9];
+const IP  = [2,6,3,1,4,8,5,7];
+const IPI = [4,1,3,5,7,2,8,6];
+const EP  = [4,1,2,3,2,3,4,1];
+const P4  = [2,4,3,1];
+const S0  = [[1,0,3,2],[3,2,1,0],[0,2,1,3],[3,1,3,2]];
+const S1  = [[0,1,2,3],[2,0,1,3],[3,0,1,0],[2,1,0,3]];
+
+function permute(bits, table) {
+  return table.map(i => bits[i-1]);
+}
+
+function xor(a, b) {
+  return a.map((v,i) => v ^ b[i]);
+}
+
+function leftShift(bits, n) {
+  return [...bits.slice(n), ...bits.slice(0,n)];
+}
+
+function sboxLookup(bits4, sbox) {
+  const row = (bits4[0] << 1) | bits4[3];
+  const col = (bits4[1] << 1) | bits4[2];
+  const val = sbox[row][col];
+  return [(val>>1)&1, val&1];
+}
+
+function generateKeys(keyBits) {
+  const after_p10    = permute(keyBits, P10);
+  const L5           = after_p10.slice(0,5);
+  const R5           = after_p10.slice(5);
+  const L5_ls1       = leftShift(L5, 1);
+  const R5_ls1       = leftShift(R5, 1);
+  const combined_ls1 = [...L5_ls1, ...R5_ls1];
+  const K1           = permute(combined_ls1, P8);
+  const L5_ls2       = leftShift(L5_ls1, 2);
+  const R5_ls2       = leftShift(R5_ls1, 2);
+  const combined_ls2 = [...L5_ls2, ...R5_ls2];
+  const K2           = permute(combined_ls2, P8);
+  return { K1, K2, after_p10, L5, R5, L5_ls1, R5_ls1, L5_ls2, R5_ls2, combined_ls1, combined_ls2 };
+}
+
+function fK(bits8, K, trace) {
+  const L = bits8.slice(0,4);
+  const R = bits8.slice(4);
+  const ep = permute(R, EP);
+  const xorK = xor(ep, K);
+  const left4 = xorK.slice(0,4);
+  const right4 = xorK.slice(4);
+  const s0out = sboxLookup(left4, S0);
+  const s1out = sboxLookup(right4, S1);
+  const p4in = [...s0out, ...s1out];
+  const p4out = permute(p4in, P4);
+  const newL = xor(L, p4out);
+  if (trace) {
+    trace.ep = ep; trace.xorK = xorK; trace.left4 = left4; trace.right4 = right4;
+    trace.s0out = s0out; trace.s1out = s1out; trace.p4in = p4in; trace.p4out = p4out;
+    trace.newL = newL; trace.L = L; trace.R = R;
+    const s0row = (left4[0]<<1)|left4[3];
+    const s0col = (left4[1]<<1)|left4[2];
+    const s1row = (right4[0]<<1)|right4[3];
+    const s1col = (right4[1]<<1)|right4[2];
+    trace.s0row=s0row; trace.s0col=s0col; trace.s1row=s1row; trace.s1col=s1col;
+  }
+  return [...newL, ...R];
+}
+
+function processSdes(input8, key10, mode) {
+  const keys = generateKeys(key10);
+  const { K1, K2 } = keys;
+  const [Ka, Kb] = mode === 'enc' ? [K1, K2] : [K2, K1];
+
+  const ip_out = permute(input8, IP);
+  const t1 = {};
+  const after_r1_pre = fK(ip_out, Ka, t1);
+  const after_r1 = [...after_r1_pre.slice(4), ...after_r1_pre.slice(0,4)];
+  const t2 = {};
+  const after_r2 = fK(after_r1, Kb, t2);
+  const output = permute(after_r2, IPI);
+
+  return { keys, K1, K2, Ka, Kb, ip_out, t1, after_r1_pre, after_r1, t2, after_r2, output };
+}
+
+// ─── UI HELPERS ───────────────────────────────────────────────────
+function setMode(m) {
+  currentMode = m;
+  document.getElementById('btn-enc').classList.toggle('active', m==='enc');
+  document.getElementById('btn-dec').classList.toggle('active', m==='dec');
+  const lbl = document.getElementById('input-label');
+  const hint = document.getElementById('input-hint');
+  if (m === 'enc') {
+    lbl.textContent = 'Plaintext (8-bit biner)';
+    hint.innerHTML = 'Masukkan 8 bit: contoh <code>01101101</code>';
+  } else {
+    lbl.textContent = 'Ciphertext (8-bit biner)';
+    hint.innerHTML = 'Masukkan 8 bit: contoh <code>10001110</code>';
+  }
+}
+
+function makeBits(bitsArr, type='default', showIdx=false) {
+  return bitsArr.map((b, i) => {
+    const cls = type === 'result' ? 'bit-result' :
+                type === 'key'   ? 'bit-k' :
+                type === 'amber' ? 'bit-amber' :
+                type === 'teal'  ? 'bit-teal' :
+                b === 1 ? 'bit-1' : 'bit-0';
+    const idx = showIdx ? `<div class="bit-idx">${i+1}</div>` : '';
+    return `<div class="bit-group"><div class="bit-cell ${cls}">${b}</div>${idx}</div>`;
+  }).join('');
+}
+
+function makeBitsStr(str, type='default', showIdx=false) {
+  return makeBits(str.split('').map(Number), type, showIdx);
+}
+
+function arrToStr(arr) { return arr.join(''); }
+
+function renderBitRow(container, arr, type='default', showIdx=true) {
+  container.innerHTML = `<div class="bit-row">${makeBits(arr, type, showIdx)}</div>`;
+}
+
+function process() {
+  const rawText = document.getElementById('input-text').value.trim();
+  const rawKey  = document.getElementById('input-key').value.trim();
+  let valid = true;
+
+  const ti = document.getElementById('input-text');
+  const tk = document.getElementById('input-key');
+  const ei = document.getElementById('input-err');
+  const ek = document.getElementById('key-err');
+
+  if (!/^[01]{8}$/.test(rawText)) {
+    ti.classList.add('error'); ti.classList.remove('ok');
+    ei.style.display = 'block'; valid = false;
+  } else {
+    ti.classList.remove('error'); ti.classList.add('ok');
+    ei.style.display = 'none';
+  }
+
+  if (!/^[01]{10}$/.test(rawKey)) {
+    tk.classList.add('error'); tk.classList.remove('ok');
+    ek.style.display = 'block'; valid = false;
+  } else {
+    tk.classList.remove('error'); tk.classList.add('ok');
+    ek.style.display = 'none';
+  }
+
+  if (!valid) return;
+
+  const input8 = rawText.split('').map(Number);
+  const key10  = rawKey.split('').map(Number);
+  const result = processSdes(input8, key10, currentMode);
+
+  showResult(rawText, rawKey, result);
+}
+
+function showResult(rawText, rawKey, r) {
+  const isEnc = currentMode === 'enc';
+  const outStr = arrToStr(r.output);
+
+  // Result card
+  const rc = document.getElementById('result-card');
+  rc.style.display = 'block';
+  document.getElementById('result-label').textContent = isEnc ? 'Ciphertext:' : 'Plaintext:';
+  document.getElementById('result-bits').innerHTML = `<div class="bit-row">${makeBits(r.output, 'result', true)}</div>`;
+  document.getElementById('result-type-label').textContent = isEnc ? 'Ciphertext' : 'Plaintext';
+  document.getElementById('result-value').textContent = outStr;
+
+  // Steps
+  document.getElementById('steps-toggle-wrap').style.display = 'block';
+  const sc = document.getElementById('steps-container');
+  sc.innerHTML = renderSteps(rawText, rawKey, r, isEnc);
+}
+
+function renderSteps(rawText, rawKey, r, isEnc) {
+  const {keys, K1, K2, Ka, Kb, ip_out, t1, after_r1_pre, after_r1, t2, after_r2, output} = r;
+  const k = keys;
+  let h = '';
+
+  // ── KEY GENERATION ──
+  h += `<div class="section-header"><div class="section-badge badge-blue">K</div><h3>Pembangkitan Kunci (Key Generation)</h3></div>`;
+
+  h += step('P10 — Permutasi Awal Kunci', `
+    <div class="text-note">Tabel posisi P10: [3,5,2,7,4,10,1,9,8,6]</div>
+    <div style="margin:0.5rem 0;">
+      <div class="result-label">Kunci awal (10-bit):</div>
+      <div class="bit-row">${makeBits(rawKey.split('').map(Number), 'key', true)}</div>
+    </div>
+    <div class="arrow-row"><span>Setelah P10</span><span class="arr">→</span></div>
+    <div class="bit-row">${makeBits(k.after_p10, 'key', true)}</div>
+  `);
+
+  h += step('Pembagian & LS-1', `
+    <div class="text-note">Bagi menjadi 2 bagian 5-bit, lalu Left Shift 1 posisi.</div>
+    <div style="display:flex;gap:2rem;flex-wrap:wrap;margin-top:0.5rem;">
+      <div>
+        <div class="result-label">Kiri (L):</div>
+        <div class="bit-row">${makeBits(k.L5, 'default', true)}</div>
+        <div class="arrow-row"><span>LS-1 →</span></div>
+        <div class="bit-row">${makeBits(k.L5_ls1, 'amber', true)}</div>
+      </div>
+      <div>
+        <div class="result-label">Kanan (R):</div>
+        <div class="bit-row">${makeBits(k.R5, 'default', true)}</div>
+        <div class="arrow-row"><span>LS-1 →</span></div>
+        <div class="bit-row">${makeBits(k.R5_ls1, 'amber', true)}</div>
+      </div>
+    </div>
+    <div style="margin-top:0.75rem;">
+      <div class="result-label">Gabungan setelah LS-1:</div>
+      <div class="bit-row">${makeBits(k.combined_ls1, 'amber', true)}</div>
+    </div>
+  `);
+
+  h += step('K1 — Permutasi P8', `
+    <div class="text-note">Tabel posisi P8: [6,3,7,4,8,5,10,9]</div>
+    <div class="arrow-row"><span>Dari gabungan LS-1 →</span><span class="arr">P8</span><span>→</span></div>
+    <div class="bit-row">${makeBits(K1, 'key', true)}</div>
+    <div class="result-label" style="margin-top:0.5rem;color:var(--purple);">K1 = ${arrToStr(K1)}</div>
+  `);
+
+  h += step('LS-2 & K2', `
+    <div class="text-note">Dari hasil LS-1, lakukan Left Shift 2 posisi lagi.</div>
+    <div style="display:flex;gap:2rem;flex-wrap:wrap;margin-top:0.5rem;">
+      <div>
+        <div class="result-label">Kiri (setelah LS-1):</div>
+        <div class="bit-row">${makeBits(k.L5_ls1, 'amber', true)}</div>
+        <div class="arrow-row"><span>LS-2 →</span></div>
+        <div class="bit-row">${makeBits(k.L5_ls2, 'teal', true)}</div>
+      </div>
+      <div>
+        <div class="result-label">Kanan (setelah LS-1):</div>
+        <div class="bit-row">${makeBits(k.R5_ls1, 'amber', true)}</div>
+        <div class="arrow-row"><span>LS-2 →</span></div>
+        <div class="bit-row">${makeBits(k.R5_ls2, 'teal', true)}</div>
+      </div>
+    </div>
+    <div style="margin-top:0.75rem;">
+      <div class="result-label">Gabungan setelah LS-2:</div>
+      <div class="bit-row">${makeBits(k.combined_ls2, 'teal', true)}</div>
+    </div>
+    <div class="arrow-row" style="margin-top:0.5rem;"><span>Setelah P8</span><span class="arr">→</span></div>
+    <div class="bit-row">${makeBits(K2, 'key', true)}</div>
+    <div class="result-label" style="margin-top:0.5rem;color:var(--purple);">K2 = ${arrToStr(K2)}</div>
+  `);
+
+  // ── ENKRIPSI / DEKRIPSI ──
+  const procTitle = isEnc ? 'Proses Enkripsi' : 'Proses Dekripsi';
+  h += `<div class="section-header"><div class="section-badge badge-purple">E</div><h3>${procTitle}</h3></div>`;
+  if (!isEnc) {
+    h += `<div class="text-note" style="margin-bottom:1rem;padding:0.75rem;background:var(--amber-bg);border:1px solid var(--amber);border-radius:var(--radius);color:var(--amber);">
+      ⚠️ Dekripsi: urutan kunci dibalik — Round 1 menggunakan <strong>K2</strong>, Round 2 menggunakan <strong>K1</strong>
+    </div>`;
+  }
+
+  h += step('IP — Initial Permutation', `
+    <div class="text-note">Tabel IP: [2,6,3,1,4,8,5,7]</div>
+    <div style="margin:0.5rem 0;">
+      <div class="result-label">${isEnc?'Plaintext':'Ciphertext'} input:</div>
+      <div class="bit-row">${makeBitsStr(rawText, 'default', true)}</div>
+    </div>
+    <div class="arrow-row"><span>Setelah IP</span><span class="arr">→</span></div>
+    <div class="bit-row">${makeBits(ip_out, 'default', true)}</div>
+    <div style="margin-top:0.75rem;display:flex;gap:2rem;flex-wrap:wrap;">
+      <div><div class="result-label">L (4-bit kiri):</div><div class="bit-row">${makeBits(ip_out.slice(0,4), 'default', true)}</div></div>
+      <div><div class="result-label">R (4-bit kanan):</div><div class="bit-row">${makeBits(ip_out.slice(4), 'default', true)}</div></div>
+    </div>
+  `);
+
+  // Round 1
+  h += `<div class="section-header" style="margin-top:1rem;"><div class="section-badge badge-amber">R1</div><h3>Round Function 1 — menggunakan ${isEnc?'K1':'K2'} = ${isEnc?arrToStr(K1):arrToStr(K2)}</h3></div>`;
+  h += renderRound(t1, ip_out, Ka, isEnc?'K1':'K2', after_r1_pre, after_r1, true);
+
+  // Round 2
+  h += `<div class="section-header" style="margin-top:1rem;"><div class="section-badge badge-teal">R2</div><h3>Round Function 2 — menggunakan ${isEnc?'K2':'K1'} = ${isEnc?arrToStr(K2):arrToStr(K1)}</h3></div>`;
+  h += renderRound(t2, after_r1, Kb, isEnc?'K2':'K1', after_r2, null, false);
+
+  // IP-1
+  h += `<div class="section-header"><div class="section-badge badge-green">✓</div><h3>IP⁻¹ — Inverse Initial Permutation</h3></div>`;
+  h += step('IP⁻¹ — Output Akhir', `
+    <div class="text-note">Tabel IP⁻¹: [4,1,3,5,7,2,8,6]</div>
+    <div style="margin:0.5rem 0;">
+      <div class="result-label">Input ke IP⁻¹:</div>
+      <div class="bit-row">${makeBits(after_r2, 'default', true)}</div>
+    </div>
+    <div class="arrow-row"><span>Setelah IP⁻¹</span><span class="arr">→</span></div>
+    <div class="bit-row">${makeBits(output, 'result', true)}</div>
+    <div class="result-final" style="margin-top:0.75rem;">
+      <div class="label">${isEnc?'Ciphertext':'Plaintext'}</div>
+      <div class="value">${arrToStr(output)}</div>
+    </div>
+  `);
+
+  return h;
+}
+
+function renderRound(t, inputBits, K, kLabel, afterFk, afterSwap, doSwap) {
+  let h = '';
+  const L = t.L, R = t.R;
+
+  h += step(`EP — Expansion Permutation pada R = ${arrToStr(R)}`, `
+    <div class="text-note">Tabel EP: [4,1,2,3,2,3,4,1] — memperluas 4-bit menjadi 8-bit</div>
+    <div style="margin:0.5rem 0;">
+      <div class="result-label">R (4-bit):</div>
+      <div class="bit-row">${makeBits(R, 'default', true)}</div>
+    </div>
+    <div class="arrow-row"><span>Setelah EP</span><span class="arr">→</span></div>
+    <div class="bit-row">${makeBits(t.ep, 'default', true)}</div>
+  `);
+
+  h += step(`XOR dengan ${kLabel} = ${arrToStr(K)}`, `
+    <div class="xor-row">
+      <div>
+        <div class="result-label">EP:</div>
+        <div class="bit-row">${makeBits(t.ep, 'default', true)}</div>
+      </div>
+      <div class="xor-sym">⊕</div>
+      <div>
+        <div class="result-label">${kLabel}:</div>
+        <div class="bit-row">${makeBits(K, 'key', true)}</div>
+      </div>
+    </div>
+    <div class="arrow-row"><span>Hasil XOR</span><span class="arr">→</span></div>
+    <div class="bit-row">${makeBits(t.xorK, 'amber', true)}</div>
+    <div style="margin-top:0.75rem;display:flex;gap:2rem;flex-wrap:wrap;">
+      <div><div class="result-label">Kiri 4-bit (untuk S0):</div><div class="bit-row">${makeBits(t.left4, 'amber', true)}</div></div>
+      <div><div class="result-label">Kanan 4-bit (untuk S1):</div><div class="bit-row">${makeBits(t.right4, 'amber', true)}</div></div>
+    </div>
+  `);
+
+  h += step(`S-Box S0 — lookup [${arrToStr(t.left4)}]`, `
+    <div class="text-note">
+      Baris = bit ke-1 dan ke-4 = <span class="inline-code">${t.left4[0]}${t.left4[3]}</span> = baris <strong>${t.s0row}</strong><br>
+      Kolom = bit ke-2 dan ke-3 = <span class="inline-code">${t.left4[1]}${t.left4[2]}</span> = kolom <strong>${t.s0col}</strong><br>
+      Nilai S0[${t.s0row}][${t.s0col}] = <strong>${S0[t.s0row][t.s0col]}</strong> = <strong>${arrToStr(t.s0out)}</strong>
+    </div>
+    ${renderSbox(S0, t.s0row, t.s0col, 'S0')}
+    <div style="margin-top:0.5rem;">
+      <div class="result-label">Output S0:</div>
+      <div class="bit-row">${makeBits(t.s0out, 'teal', true)}</div>
+    </div>
+  `);
+
+  h += step(`S-Box S1 — lookup [${arrToStr(t.right4)}]`, `
+    <div class="text-note">
+      Baris = bit ke-1 dan ke-4 = <span class="inline-code">${t.right4[0]}${t.right4[3]}</span> = baris <strong>${t.s1row}</strong><br>
+      Kolom = bit ke-2 dan ke-3 = <span class="inline-code">${t.right4[1]}${t.right4[2]}</span> = kolom <strong>${t.s1col}</strong><br>
+      Nilai S1[${t.s1row}][${t.s1col}] = <strong>${S1[t.s1row][t.s1col]}</strong> = <strong>${arrToStr(t.s1out)}</strong>
+    </div>
+    ${renderSbox(S1, t.s1row, t.s1col, 'S1')}
+    <div style="margin-top:0.5rem;">
+      <div class="result-label">Output S1:</div>
+      <div class="bit-row">${makeBits(t.s1out, 'teal', true)}</div>
+    </div>
+  `);
+
+  h += step('P4 — Permutasi & XOR dengan L', `
+    <div class="text-note">Tabel P4: [2,4,3,1]</div>
+    <div style="margin:0.5rem 0;">
+      <div class="result-label">Gabungan S0+S1 = ${arrToStr(t.p4in)}:</div>
+      <div class="bit-row">${makeBits(t.p4in, 'teal', true)}</div>
+    </div>
+    <div class="arrow-row"><span>Setelah P4</span><span class="arr">→</span></div>
+    <div class="bit-row">${makeBits(t.p4out, 'teal', true)}</div>
+    <div style="height:0.75rem;"></div>
+    <div class="xor-row">
+      <div>
+        <div class="result-label">P4:</div>
+        <div class="bit-row">${makeBits(t.p4out, 'teal', true)}</div>
+      </div>
+      <div class="xor-sym">⊕</div>
+      <div>
+        <div class="result-label">L = ${arrToStr(L)}:</div>
+        <div class="bit-row">${makeBits(L, 'default', true)}</div>
+      </div>
+    </div>
+    <div class="arrow-row"><span>Hasil XOR (L baru)</span><span class="arr">→</span></div>
+    <div class="bit-row">${makeBits(t.newL, 'result', true)}</div>
+    <div style="height:0.75rem;"></div>
+    <div class="result-label">Gabungan L_baru + R:</div>
+    <div class="bit-row">${makeBits(afterFk, 'default', true)}</div>
+  `);
+
+  if (doSwap && afterSwap) {
+    h += step('SW — Swap Kiri & Kanan', `
+      <div class="text-note">Setelah Round 1, bagian kiri dan kanan ditukar (swap).</div>
+      <div class="arrow-row">
+        <div>
+          <div class="result-label">Sebelum swap:</div>
+          <div class="bit-row">${makeBits(afterFk, 'default', true)}</div>
+        </div>
+        <span class="arr" style="font-size:1.5rem;">⇌</span>
+        <div>
+          <div class="result-label">Setelah swap (input R2):</div>
+          <div class="bit-row">${makeBits(afterSwap, 'amber', true)}</div>
+        </div>
+      </div>
+    `);
+  }
+
+  return h;
+}
+
+function renderSbox(sbox, hr, hc, label) {
+  const cols = ['00','01','10','11'];
+  let t = `<table class="sbox-table"><thead><tr><th>${label}</th>`;
+  cols.forEach(c => t += `<th>col ${c}</th>`);
+  t += '</tr></thead><tbody>';
+  sbox.forEach((row, ri) => {
+    t += `<tr><th>baris ${ri}</th>`;
+    row.forEach((val, ci) => {
+      const hi = ri===hr && ci===hc;
+      t += `<td class="${hi?'highlight':''}">${val}</td>`;
+    });
+    t += '</tr>';
+  });
+  t += '</tbody></table>';
+  return t;
+}
+
+function step(title, content) {
+  return `<div class="step"><div class="step-label">→ ${title}</div>${content}</div>`;
+}
+
+function toggleSteps() {
+  const sc = document.getElementById('steps-container');
+  const ic = document.getElementById('toggle-icon');
+  const isOpen = sc.style.display !== 'none';
+  sc.style.display = isOpen ? 'none' : 'block';
+  ic.classList.toggle('open', !isOpen);
+  document.querySelector('#steps-toggle-wrap .toggle-btn span:first-child').textContent =
+    isOpen ? '📋 Tampilkan Solusi Penyelesaian (Step-by-Step)' : '📋 Sembunyikan Solusi Penyelesaian';
+}
+
+function resetAll() {
+  document.getElementById('input-text').value = '';
+  document.getElementById('input-key').value = '';
+  document.getElementById('input-text').className = '';
+  document.getElementById('input-key').className = '';
+  document.getElementById('input-err').style.display = 'none';
+  document.getElementById('key-err').style.display = 'none';
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('steps-toggle-wrap').style.display = 'none';
+  document.getElementById('steps-container').style.display = 'none';
+  document.getElementById('toggle-icon').classList.remove('open');
+}
+
+// Allow Enter key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') process();
+});
+</script>
+</body>
+</html>
